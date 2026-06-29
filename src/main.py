@@ -1,15 +1,14 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from .models import Conta, ContaBase, DiaProjetado
-from .repository import listar_contas, criar_conta
+from .database import Base, engine, get_db
+from .models.clientes import Cliente, ClienteCreate, ClienteUpdate, ClienteOut
 
-app = FastAPI(title="Fluxo de Caixa Preditivo")
+Base.metadata.create_all(bind=engine)
 
-@app.get("/contas", response_model=list[Conta])
-def rota_listar_contas():
-    return listar_contas()
+app = FastAPI(title="Sistema de Gestão Financeira")
 
 
-@app.post("/conta", response_model=Conta, status_code=200)
-def rota_criar_conta(dados: ContaBase):
-    return criar_conta(dados)
+@app.get("/clientes", response_model=list[ClienteOut])
+def listar_clientes(db: Session = Depends(get_db)):
+    return db.query(Cliente).all()

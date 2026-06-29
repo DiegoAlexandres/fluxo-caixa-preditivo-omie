@@ -1,57 +1,49 @@
-# Fluxo Caixa Preditivo Omie
+# Backend Sistema de Gestão Financeira
 
-API REST em Python FastAPI para projeção de fluxo de caixa: cadastro de contas a pagar e a receber, e cálculo do saldo futuro projetado dia a dia, com identificação de datas de risco de caixa negativo.
+API REST em Python (FastAPI) para um sistema de gestão financeira simples: cadastro de clientes, fornecedores, categorias, e controle de contas a pagar e a receber.
 
 ## O problema
 
-Pequenas e médias empresas frequentemente não têm visibilidade clara sobre seu saldo de caixa nos próximos dias/semanas, informação hoje mantida manualmente em planilhas. Esta API projeta o saldo futuro a partir das contas a pagar e a receber já cadastradas, permitindo identificar com antecedência se o caixa ficará negativo em algum momento.
+Pequenas e médias empresas frequentemente gerenciam contas a pagar e a receber em planilhas, sem um sistema centralizado que relacione esses lançamentos a clientes, fornecedores e categorias de forma estruturada. Este projeto constrói essa base: um backend com modelagem relacional real, pronto para servir um frontend de gestão financeira.
+
+Este é o backend do sistema — o [frontend](https://github.com/DiegoAlexandres/frontend-sistema-gestao-financeira) (Next.js) consome esta API para oferecer as telas de cadastro e visualização.
+
+## Modelagem
+
+- **Cliente** — quem paga (relacionado a Conta a Receber)
+- **Fornecedor** — quem recebe (relacionado a Conta a Pagar)
+- **Categoria** — classificação de lançamentos (ex: Aluguel, Vendas, Impostos), compartilhada entre os dois tipos de conta
+- **Conta a Receber** — lançamentos a receber de um cliente, com data de emissão, vencimento e pagamento
+- **Conta a Pagar** — lançamentos a pagar a um fornecedor, com a mesma estrutura de datas
 
 ## Stack
 
 - **Python 3.14**
 - **FastAPI** — framework web e validação de dados
+- **PostgreSQL 18** — banco de dados relacional (via Docker em desenvolvimento)
+- **SQLAlchemy** — ORM
 - **Uvicorn** — servidor ASGI
 - **uv** — gerenciamento de dependências e ambiente
 
 ## Como rodar
 
 ```bash
-git clone https://github.com/DiegoAlexandres/fluxo-caixa-preditivo-omie.git
-cd fluxo-caixa-preditivo-omie
+git clone https://github.com/DiegoAlexandres/backend-sistema-gestao-financeira.git
+cd backend-sistema-gestao-financeira
+docker compose up -d
 uv sync
-uv run uvicorn main:app --reload
+uv run uvicorn src.main:app --reload
 ```
 
-Acesse a documentação interativa em [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs) para testar todas as rotas direto no navegador.
-
-## Endpoints
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `POST` | `/contas` | Cadastra uma conta a pagar ou a receber (nome, valor, data, tipo) |
-| `GET` | `/contas` | Lista todas as contas cadastradas |
-| `GET` | `/forecast` | Retorna a projeção de saldo dia a dia, a partir de um saldo inicial e um número de dias |
-| `GET` | `/forecast/alertas` | Retorna as datas em que o saldo projetado fica negativo |
-
-## Exemplo de uso
-
-**Cadastrar uma conta a pagar:**
-```bash
-curl -X POST http://127.0.0.1:8000/contas \
-  -H "Content-Type: application/json" \
-  -d '{"nome": "Aluguel", "valor": -2500.00, "data": "2026-07-05", "tipo": "pagar"}'
-```
-
-**Consultar a projeção de saldo para os próximos 30 dias:**
-```bash
-curl "http://127.0.0.1:8000/forecast?saldo_inicial=10000&dias=30"
-```
+Acesse a documentação interativa em [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs) para testar as rotas direto no navegador.
 
 ## Próximos passos
 
-- Persistência em banco de dados (PostgreSQL)
-- Integração opcional com a API da Omie (contas a pagar/receber reais)
+- CRUD completo de Cliente, Fornecedor e Categoria
+- CRUD completo de Conta a Receber e Conta a Pagar, com relacionamento via chave estrangeira
+- Rota de saldo consolidado
 - Testes automatizados
+- Deploy em ambiente de produção (Neon)
 
 ## Licença
 
